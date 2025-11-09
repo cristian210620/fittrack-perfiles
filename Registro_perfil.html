@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registro de Perfil</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #eef3f9;
+      text-align: center;
+      padding: 15px;
+    }
+    h1 { color: #007bff; }
+    input, select, button {
+      width: 90%; max-width: 300px;
+      padding: 10px; margin: 6px auto;
+      display: block; border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #007bff; color: #fff;
+      border: none; font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover { background: #0056b3; }
+    #listaPerfiles {
+      margin-top: 20px;
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>👤 Registro de Perfil</h1>
+
+  <input type="text" id="nombre" placeholder="Nombre completo">
+  <input type="number" id="edad" placeholder="Edad (años)">
+  <input type="number" id="peso" placeholder="Peso (kg)">
+  <input type="number" id="altura" placeholder="Altura (cm)">
+  <select id="actividad">
+    <option value="">Nivel de actividad</option>
+    <option value="Sedentario">Sedentario</option>
+    <option value="Ejercicio ocasional">Ejercicio ocasional</option>
+    <option value="Activo">Activo</option>
+  </select>
+
+  <button onclick="guardarPerfil()">Guardar Perfil</button>
+
+  <div id="listaPerfiles">
+    <h3>👥 Perfiles Registrados</h3>
+    <div id="perfilesContainer"></div>
+  </div>
+
+  <script>
+    if (!localStorage.getItem("perfilesFitTrack")) {
+      localStorage.setItem("perfilesFitTrack", JSON.stringify([]));
+    }
+
+    function calcularIMC(peso, altura) {
+      const imc = peso / ((altura / 100) ** 2);
+      let estado = "";
+      if (imc < 18.5) estado = "Bajo peso";
+      else if (imc < 24.9) estado = "Peso normal";
+      else if (imc < 29.9) estado = "Sobrepeso";
+      else estado = "Obesidad";
+      return { valor: imc.toFixed(1), estado };
+    }
+
+    function guardarPerfil() {
+      const nombre = document.getElementById("nombre").value.trim();
+      const edad = parseInt(document.getElementById("edad").value);
+      const peso = parseFloat(document.getElementById("peso").value);
+      const altura = parseFloat(document.getElementById("altura").value);
+      const actividad = document.getElementById("actividad").value;
+
+      if (!nombre || !edad || !peso || !altura || !actividad) {
+        alert("Por favor completa todos los campos.");
+        return;
+      }
+
+      const imc = calcularIMC(peso, altura);
+      let perfiles = JSON.parse(localStorage.getItem("perfilesFitTrack")) || [];
+      perfiles.push({ nombre, edad, peso, altura, actividad, imc });
+      localStorage.setItem("perfilesFitTrack", JSON.stringify(perfiles));
+
+      alert("✅ Perfil guardado correctamente.");
+      limpiarCampos();
+      renderizarPerfiles();
+    }
+
+    function limpiarCampos() {
+      document.getElementById("nombre").value = "";
+      document.getElementById("edad").value = "";
+      document.getElementById("peso").value = "";
+      document.getElementById("altura").value = "";
+      document.getElementById("actividad").value = "";
+    }
+
+    function renderizarPerfiles() {
+      const perfiles = JSON.parse(localStorage.getItem("perfilesFitTrack")) || [];
+      const contenedor = document.getElementById("perfilesContainer");
+
+      if (perfiles.length === 0) {
+        contenedor.innerHTML = "<p>No hay perfiles registrados.</p>";
+        return;
+      }
+
+      let html = "";
+      perfiles.forEach((p, i) => {
+        html += `
+          <div style='border-bottom:1px solid #eee;padding:10px 0;'>
+            <b>${i + 1}. ${p.nombre}</b><br>
+            Edad: ${p.edad} años<br>
+            Peso: ${p.peso} kg | Altura: ${p.altura} cm<br>
+            Actividad: ${p.actividad}<br>
+            IMC: <b>${p.imc.valor}</b> (${p.imc.estado})
+          </div>
+        `;
+      });
+
+      contenedor.innerHTML = html;
+    }
+
+    renderizarPerfiles();
+  </script>
+
+</body>
+</html>
