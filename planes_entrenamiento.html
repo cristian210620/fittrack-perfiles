@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Planes de Entrenamiento</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 20px;
+    }
+    h2 {
+      color: #333;
+      text-align: center;
+    }
+    select, button {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 1rem;
+    }
+    .info {
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-top: 20px;
+    }
+    .routine {
+      background: #e8f5e9;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🏋️ Planes de Entrenamiento Personalizado</h2>
+
+  <label for="perfilSelect">Selecciona tu perfil:</label>
+  <select id="perfilSelect"></select>
+
+  <div class="info" id="perfilInfo"></div>
+
+  <label for="objetivo">Selecciona tu objetivo:</label>
+  <select id="objetivo">
+    <option value="">--Seleccionar--</option>
+    <option value="perdida">Pérdida de peso</option>
+    <option value="masa">Aumento de masa muscular</option>
+    <option value="rendimiento">Rendimiento deportivo</option>
+    <option value="mantenimiento">Mantenimiento</option>
+  </select>
+
+  <label for="tipo">Tipo de entrenamiento:</label>
+  <select id="tipo">
+    <option value="">--Seleccionar--</option>
+    <option value="gimnasio">Gimnasio</option>
+    <option value="peso_corporal">Peso corporal</option>
+  </select>
+
+  <button id="generarBtn">Generar rutina</button>
+
+  <div class="routine" id="rutina"></div>
+
+  <script>
+    // --- Cargar perfiles guardados ---
+    const perfilSelect = document.getElementById("perfilSelect");
+    const perfilInfo = document.getElementById("perfilInfo");
+    const rutinaDiv = document.getElementById("rutina");
+
+    const perfiles = JSON.parse(localStorage.getItem("perfiles")) || [];
+
+    function mostrarPerfiles() {
+      perfilSelect.innerHTML = "<option value=''>--Seleccionar perfil--</option>";
+      perfiles.forEach((p, i) => {
+        const opt = document.createElement("option");
+        opt.value = i;
+        opt.textContent = p.nombre;
+        perfilSelect.appendChild(opt);
+      });
+    }
+
+    function calcularIMC(peso, altura) {
+      return peso / Math.pow(altura / 100, 2);
+    }
+
+    function clasificarIMC(imc) {
+      if (imc < 18.5) return "Bajo peso";
+      if (imc < 25) return "Peso normal";
+      if (imc < 30) return "Sobrepeso";
+      return "Obesidad";
+    }
+
+    perfilSelect.addEventListener("change", () => {
+      const perfil = perfiles[perfilSelect.value];
+      if (perfil) {
+        const imc = calcularIMC(perfil.peso, perfil.altura).toFixed(2);
+        perfilInfo.innerHTML = `
+          <strong>Nombre:</strong> ${perfil.nombre}<br>
+          <strong>Edad:</strong> ${perfil.edad} años<br>
+          <strong>Peso:</strong> ${perfil.peso} kg<br>
+          <strong>Altura:</strong> ${perfil.altura} cm<br>
+          <strong>Actividad:</strong> ${perfil.actividad}<br>
+          <strong>IMC:</strong> ${imc} (${clasificarIMC(imc)})
+        `;
+      } else {
+        perfilInfo.innerHTML = "";
+      }
+    });
+
+    // --- Rutinas base ---
+    const rutinas = {
+      perdida: {
+        gimnasio: [
+          "Cinta 30 min + Circuito de pesas livianas 3x15 + Abdominales 3x20",
+          "Bicicleta 20 min + Sentadillas 4x12 + Press banca 3x12",
+          "Cardio HIIT 20 min + Peso muerto 3x10 + Plancha 3x1 min"
+        ],
+        peso_corporal: [
+          "Jumping jacks 3x30 + Sentadillas 4x15 + Planchas 3x1 min",
+          "Burpees 3x10 + Zancadas 3x15 + Crunches 3x20",
+          "Correr 25 min + Flexiones 3x12 + Abdominales 3x20"
+        ]
+      },
+      masa: {
+        gimnasio: [
+          "Press banca 4x8 + Peso muerto 4x6 + Dominadas 3x10",
+          "Sentadillas 4x8 + Press militar 3x10 + Curl bíceps 3x12",
+          "Remo con barra 4x8 + Fondos 3x12 + Elevaciones laterales 3x15"
+        ],
+        peso_corporal: [
+          "Flexiones 4x15 + Sentadillas 4x20 + Planchas 3x1 min",
+          "Dominadas 3x10 + Zancadas 3x15 + Abdominales 3x25",
+          "Fondos en banco 3x12 + Puentes de glúteo 3x20 + Escaladores 3x30 seg"
+        ]
+      },
+      rendimiento: {
+        gimnasio: [
+          "Cinta 15 min + Pesas olímpicas 4x6 + Saltos pliométricos 3x10",
+          "Remo 10 min + Press militar 4x8 + Sentadilla frontal 4x8",
+          "Circuito funcional 30 min"
+        ],
+        peso_corporal: [
+          "Sprints 10x100m + Flexiones 4x15 + Planchas dinámicas 3x1 min",
+          "Burpees 3x12 + Saltos 3x15 + Mountain climbers 3x30 seg",
+          "Carrera 20 min + Core completo 3x20"
+        ]
+      },
+      mantenimiento: {
+        gimnasio: [
+          "Cardio 20 min + Pesas ligeras 3x12 + Estiramientos 10 min",
+          "Cinta 15 min + Press banca 3x10 + Sentadillas 3x10",
+          "Bicicleta 20 min + Plancha 3x1 min + Curl bíceps 3x15"
+        ],
+        peso_corporal: [
+          "Correr 20 min + Flexiones 3x15 + Abdominales 3x20",
+          "Saltos 3x20 + Sentadillas 3x15 + Estiramientos 10 min",
+          "Burpees 3x10 + Zancadas 3x15 + Planchas 3x1 min"
+        ]
+      }
+    };
+
+    // --- Generar rutina ---
+    document.getElementById("generarBtn").addEventListener("click", () => {
+      const objetivo = document.getElementById("objetivo").value;
+      const tipo = document.getElementById("tipo").value;
+      const perfil = perfiles[perfilSelect.value];
+
+      if (!perfil) return alert("Selecciona un perfil");
+      if (!objetivo || !tipo) return alert("Selecciona tu objetivo y tipo de entrenamiento");
+
+      const lista = rutinas[objetivo][tipo];
+      const aleatoria = lista[Math.floor(Math.random() * lista.length)];
+
+      rutinaDiv.innerHTML = `
+        <h3>Rutina para ${perfil.nombre}</h3>
+        <p><strong>Objetivo:</strong> ${document.getElementById("objetivo").options[document.getElementById("objetivo").selectedIndex].text}</p>
+        <p><strong>Tipo de entrenamiento:</strong> ${document.getElementById("tipo").options[document.getElementById("tipo").selectedIndex].text}</p>
+        <p><strong>Rutina sugerida:</strong><br>${aleatoria}</p>
+      `;
+    });
+
+    mostrarPerfiles();
+  </script>
+</body>
+</html>
